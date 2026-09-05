@@ -1,0 +1,54 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowedTools "Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh label list:*)"'
+          prompt: |
+            Analiza el issue #${{ github.event.issue.number }} del repositorio ${{ github.repository }}:
+
+            Título: ${{ github.event.issue.title }}
+            Cuerpo:
+            ${{ github.event.issue.body }}
+
+            Sigue estos pasos:
+
+            1. Ejecuta `gh label list --repo ${{ github.repository }}` para ver los labels
+               disponibles en el repositorio.
+            2. A partir del título y el cuerpo del issue, decide qué labels existentes
+               aplican (por ejemplo bug, enhancement, documentation, accessibility,
+               question, help wanted, good first issue, duplicate, invalid, wontfix).
+               Usa ÚNICAMENTE labels que ya existan en el repo, no crees labels nuevos.
+               Aplícalos con:
+               `gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --add-label "<label1>,<label2>"`
+            3. Redacta un diagnóstico general del problema, pensado para servir de base
+               a quien vaya a implementar la solución. Debe incluir:
+               - Resumen breve del problema reportado.
+               - Causa probable o hipótesis de origen.
+               - Área(s) o archivo(s) del código que probablemente estén involucrados
+                 (revisa el repositorio si hace falta).
+               - Enfoque sugerido para abordar la solución (sin implementarla todavía).
+               Deja explícito que es un análisis preliminar automático.
+            4. Publica ese diagnóstico como comentario en el issue con:
+               `gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "<diagnóstico>"`
