@@ -50,5 +50,8 @@ jobs:
                  (revisa el repositorio si hace falta).
                - Enfoque sugerido para abordar la solución (sin implementarla todavía).
                Deja explícito que es un análisis preliminar automático.
+               El diagnóstico debe estar redactado en formato Markdown válido que GitHub
+               pueda interpretar correctamente (usa encabezados, listas con `-`, y
+               bloques de código con ``` cuando corresponda).
             4. Publica ese diagnóstico como comentario en el issue con:
                `gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "<diagnóstico>"`
