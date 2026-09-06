@@ -42,6 +42,7 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const resumeBtn = document.getElementById('resume-btn');
 const themeSwitch = document.getElementById('theme-switch');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
@@ -233,8 +234,12 @@ function endGame() {
   if (gameOver) return;
   gameOver = true;
   cancelAnimationFrame(animId);
+  overlay.classList.remove('overlay--paused');
+  overlay.classList.add('overlay--gameover');
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
+  resumeBtn.classList.add('hidden');
+  restartBtn.classList.remove('hidden');
   overlay.classList.remove('hidden');
 }
 
@@ -242,12 +247,17 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    overlay.classList.add('hidden');
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
+    overlay.classList.remove('overlay--gameover');
+    overlay.classList.add('overlay--paused');
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
+    resumeBtn.classList.remove('hidden');
+    restartBtn.classList.remove('hidden');
     overlay.classList.remove('hidden');
   }
 }
@@ -284,6 +294,9 @@ function init() {
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  overlay.classList.remove('overlay--paused', 'overlay--gameover');
+  resumeBtn.classList.add('hidden');
+  restartBtn.classList.remove('hidden');
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
@@ -314,6 +327,7 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+resumeBtn.addEventListener('click', togglePause);
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);

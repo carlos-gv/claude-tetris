@@ -216,6 +216,10 @@ kbd {
   display: none;
 }
 
+.hidden {
+  display: none;
+}
+
 .overlay-box {
   text-align: center;
   display: flex;
@@ -231,13 +235,18 @@ kbd {
   color: var(--color-overlay-title);
 }
 
+.overlay--paused #overlay-title {
+  color: var(--color-accent);
+}
+
 #overlay-score {
   font-family: 'Courier New', Courier, monospace;
   font-size: 14px;
   color: var(--color-accent);
 }
 
-#restart-btn {
+#restart-btn,
+#resume-btn {
   margin-top: 8px;
   background: var(--color-restart-bg);
   color: var(--color-restart-text);
@@ -251,6 +260,7 @@ kbd {
   transition: background 0.15s;
 }
 
-#restart-btn:hover {
+#restart-btn:hover,
+#resume-btn:hover {
   background: var(--color-restart-hover);
 }
