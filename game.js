@@ -257,7 +257,7 @@ function togglePause() {
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
     resumeBtn.classList.remove('hidden');
-    restartBtn.classList.add('hidden');
+    restartBtn.classList.remove('hidden');
     overlay.classList.remove('hidden');
   }
 }
