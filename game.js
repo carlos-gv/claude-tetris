@@ -32,6 +32,13 @@ const LINE_SCORES = [0, 100, 300, 500, 800];
 
 const GRID_COLORS = { dark: '#22222e', light: '#d8d8e2' };
 const THEME_KEY = 'tetris-theme';
+const START_LEVEL_KEY = 'tetris-start-level';
+const MIN_LEVEL = 1;
+const MAX_LEVEL = 15;
+
+function dropIntervalFor(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -46,6 +53,12 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const resumeBtn = document.getElementById('resume-btn');
 const themeSwitch = document.getElementById('theme-switch');
+const pauseMenu = document.getElementById('pause-menu');
+const controlsBtn = document.getElementById('controls-btn');
+const menuControls = document.getElementById('menu-controls');
+const startLevelSelect = document.getElementById('start-level');
+
+let startLevel = MIN_LEVEL;
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -113,8 +126,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = Math.max(startLevel, Math.floor(lines / 10) + 1);
+    dropInterval = dropIntervalFor(level);
     updateHUD();
   }
 }
@@ -242,6 +255,7 @@ function endGame() {
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   resumeBtn.classList.add('hidden');
   restartBtn.classList.remove('hidden');
+  pauseMenu.classList.add('hidden');
   overlay.classList.remove('hidden');
 }
 
@@ -250,6 +264,7 @@ function togglePause() {
   paused = !paused;
   if (!paused) {
     overlay.classList.add('hidden');
+    pauseMenu.classList.add('hidden');
     lastTime = performance.now();
     loop(lastTime);
   } else {
@@ -260,6 +275,8 @@ function togglePause() {
     overlayScore.textContent = '';
     resumeBtn.classList.remove('hidden');
     restartBtn.classList.remove('hidden');
+    menuControls.classList.add('hidden');
+    pauseMenu.classList.remove('hidden');
     overlay.classList.remove('hidden');
   }
 }
@@ -286,10 +303,10 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = dropIntervalFor(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
@@ -299,12 +316,17 @@ function init() {
   overlay.classList.remove('overlay--paused', 'overlay--gameover');
   resumeBtn.classList.add('hidden');
   restartBtn.classList.remove('hidden');
+  pauseMenu.classList.add('hidden');
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (e.target === startLevelSelect) return;
+    togglePause();
+    return;
+  }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -328,8 +350,39 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', init);
-resumeBtn.addEventListener('click', togglePause);
+restartBtn.addEventListener('click', e => { e.currentTarget.blur(); init(); });
+resumeBtn.addEventListener('click', e => { e.currentTarget.blur(); togglePause(); });
+
+controlsBtn.addEventListener('click', e => {
+  e.currentTarget.blur();
+  menuControls.classList.toggle('hidden');
+});
+
+function loadStartLevel() {
+  try {
+    const saved = parseInt(localStorage.getItem(START_LEVEL_KEY), 10);
+    if (!Number.isNaN(saved)) {
+      startLevel = Math.min(MAX_LEVEL, Math.max(MIN_LEVEL, saved));
+    }
+  } catch (err) { /* storage unavailable */ }
+}
+
+function initStartLevelSelect() {
+  for (let lvl = MIN_LEVEL; lvl <= MAX_LEVEL; lvl++) {
+    const opt = document.createElement('option');
+    opt.value = String(lvl);
+    opt.textContent = String(lvl);
+    startLevelSelect.appendChild(opt);
+  }
+  startLevelSelect.value = String(startLevel);
+  startLevelSelect.addEventListener('change', () => {
+    startLevel = Math.min(MAX_LEVEL, Math.max(MIN_LEVEL, parseInt(startLevelSelect.value, 10) || MIN_LEVEL));
+    startLevelSelect.value = String(startLevel);
+    try {
+      localStorage.setItem(START_LEVEL_KEY, String(startLevel));
+    } catch (err) { /* storage unavailable */ }
+  });
+}
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -348,4 +401,6 @@ themeSwitch.addEventListener('change', () => {
 });
 
 initTheme();
+loadStartLevel();
+initStartLevelSelect();
 init();
