@@ -149,6 +149,127 @@ kbd {
   color: var(--color-kbd-text);
 }
 
+/* ---- Récords ---- */
+.records-list {
+  list-style: decimal inside;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: var(--color-controls-text);
+  padding: 0;
+  margin: 0;
+}
+
+.records-list li {
+  display: list-item;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.records-list li.is-current {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.records-list li .rec-name {
+  display: inline-block;
+  min-width: 70px;
+}
+
+.records-list .rec-empty {
+  list-style: none;
+  color: var(--color-label);
+  font-style: italic;
+}
+
+.records-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--color-controls-text);
+  margin-top: 6px;
+}
+
+.records-stats b {
+  color: var(--color-accent);
+}
+
+#reset-records-btn {
+  margin-top: 8px;
+  background: transparent;
+  color: var(--color-controls-text);
+  border: 1px solid var(--color-board-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-family: inherit;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+#reset-records-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+.name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.name-form.hidden,
+.overlay-records.hidden {
+  display: none;
+}
+
+.name-form__msg {
+  font-size: 13px;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+#name-input {
+  background: var(--color-board-bg);
+  border: 1px solid var(--color-board-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.name-form button {
+  background: var(--color-restart-bg);
+  color: var(--color-restart-text);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.overlay-records {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 200px;
+}
+
+.overlay-records .records-list {
+  font-size: 13px;
+  width: 100%;
+}
+
 /* ---- Theme switch ---- */
 .theme-toggle {
   flex-direction: row;
