@@ -53,6 +53,11 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const resumeBtn = document.getElementById('resume-btn');
+const pauseMenu = document.getElementById('pause-menu');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const controlsList = document.getElementById('controls-list');
+const startLevelSelect = document.getElementById('start-level-select');
 const themeSwitch = document.getElementById('theme-switch');
 const skinSelect = document.getElementById('skin-select');
 const nameForm = document.getElementById('name-form');
@@ -60,8 +65,16 @@ const nameInput = document.getElementById('name-input');
 const overlayRecords = document.getElementById('overlay-records');
 const resetRecordsBtn = document.getElementById('reset-records-btn');
 
+const MAX_START_LEVEL = 15;
+const START_LEVEL_KEY = 'tetris-start-level';
+
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let combo, comboMax, maxLinesInClear, pendingRank;
+let startLevel = 1;
+
+function levelInterval(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 /* ---- Tabla de records ---- */
 function defaultRecords() {
@@ -196,8 +209,8 @@ function clearLines() {
     if (cleared > maxLinesInClear) maxLinesInClear = cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
     if (combo > 0) score += 50 * combo * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = Math.max(startLevel, Math.floor(lines / 10) + 1);
+    dropInterval = levelInterval(level);
     updateHUD();
   } else {
     combo = -1;
@@ -379,7 +392,7 @@ function endGame() {
   overlay.classList.add('overlay--gameover');
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
-  resumeBtn.classList.add('hidden');
+  pauseMenu.classList.add('hidden');
   restartBtn.classList.remove('hidden');
 
   if (comboMax > records.bestCombo) records.bestCombo = comboMax;
@@ -436,12 +449,18 @@ function togglePause() {
     overlay.classList.add('overlay--paused');
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
-    resumeBtn.classList.remove('hidden');
-    restartBtn.classList.remove('hidden');
+    pauseMenu.classList.remove('hidden');
+    restartBtn.classList.add('hidden');
     nameForm.classList.add('hidden');
     overlayRecords.classList.add('hidden');
     overlay.classList.remove('hidden');
   }
+}
+
+function setControlsOpen(open) {
+  controlsList.classList.toggle('hidden', !open);
+  controlsBtn.setAttribute('aria-expanded', String(open));
+  controlsBtn.textContent = open ? 'Ocultar controles' : 'Ver controles';
 }
 
 function loop(ts) {
@@ -466,10 +485,10 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = levelInterval(startLevel);
   dropAccum = 0;
   combo = -1;
   comboMax = 0;
@@ -481,7 +500,8 @@ function init() {
   updateHUD();
   overlay.classList.add('hidden');
   overlay.classList.remove('overlay--paused', 'overlay--gameover');
-  resumeBtn.classList.add('hidden');
+  pauseMenu.classList.add('hidden');
+  setControlsOpen(false);
   restartBtn.classList.remove('hidden');
   nameForm.classList.add('hidden');
   overlayRecords.classList.add('hidden');
@@ -491,7 +511,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -516,7 +536,28 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+pauseRestartBtn.addEventListener('click', init);
 resumeBtn.addEventListener('click', togglePause);
+controlsBtn.addEventListener('click', () => {
+  setControlsOpen(controlsList.classList.contains('hidden'));
+});
+
+function initStartLevel() {
+  for (let i = 1; i <= MAX_START_LEVEL; i++) {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = String(i);
+    startLevelSelect.appendChild(opt);
+  }
+  const saved = parseInt(localStorage.getItem(START_LEVEL_KEY), 10);
+  startLevel = saved >= 1 && saved <= MAX_START_LEVEL ? saved : 1;
+  startLevelSelect.value = String(startLevel);
+}
+
+startLevelSelect.addEventListener('change', () => {
+  startLevel = parseInt(startLevelSelect.value, 10) || 1;
+  localStorage.setItem(START_LEVEL_KEY, String(startLevel));
+});
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -555,4 +596,5 @@ skinSelect.addEventListener('change', () => {
 
 initTheme();
 initSkin();
+initStartLevel();
 init();
