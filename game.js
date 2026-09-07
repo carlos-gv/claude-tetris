@@ -283,12 +283,16 @@ function draw() {
 
   if (gameOver) return;
 
-  // ghost
+  // ghost — skip cells that sit over a settled block (the live piece is drawn on top afterwards)
   const gy = ghostY();
   for (let r = 0; r < current.shape.length; r++)
-    for (let c = 0; c < current.shape[r].length; c++)
-      if (current.shape[r][c])
-        drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
+    for (let c = 0; c < current.shape[r].length; c++) {
+      if (!current.shape[r][c]) continue;
+      const bx = current.x + c;
+      const by = gy + r;
+      if (by >= 0 && !board[by][bx])
+        drawBlock(ctx, bx, by, current.shape[r][c], BLOCK, 0.2);
+    }
 
   // current piece
   for (let r = 0; r < current.shape.length; r++)
