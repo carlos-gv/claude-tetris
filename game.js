@@ -15,15 +15,29 @@ function drawRetro(context, x, y, colorIndex, size, alpha, colors) {
 
 function drawNeon(context, x, y, colorIndex, size, alpha, colors) {
   const color = colors[colorIndex];
-  context.globalAlpha = alpha ?? 1;
+  const px = x * size + 2;
+  const py = y * size + 2;
+  const s = size - 4;
+  context.shadowBlur = 0;
+  context.shadowColor = 'transparent';
+  if (alpha != null && alpha < 1) {
+    // ghost: outline only, no glow (glow from adjacent cells stacks and reads as solid)
+    context.globalAlpha = 0.5;
+    context.strokeStyle = color;
+    context.lineWidth = 2;
+    context.strokeRect(px + 1, py + 1, s - 2, s - 2);
+    context.globalAlpha = 1;
+    return;
+  }
+  context.globalAlpha = 1;
   context.shadowBlur = 12;
   context.shadowColor = color;
   context.fillStyle = color;
-  context.fillRect(x * size + 2, y * size + 2, size - 4, size - 4);
+  context.fillRect(px, py, s, s);
   context.shadowBlur = 0;
+  context.shadowColor = 'transparent';
   context.fillStyle = 'rgba(255,255,255,0.25)';
-  context.fillRect(x * size + 2, y * size + 2, size - 4, 3);
-  context.globalAlpha = 1;
+  context.fillRect(px, py, s, 3);
 }
 
 function drawPastel(context, x, y, colorIndex, size, alpha, colors) {
