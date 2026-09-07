@@ -149,6 +149,29 @@ kbd {
   color: var(--color-kbd-text);
 }
 
+/* ---- Skin select ---- */
+.skin-select select {
+  width: 100%;
+  background: var(--color-kbd-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-kbd-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+:root[data-skin="neon"] #board,
+:root[data-skin="neon"] #next-canvas {
+  background: #05050b;
+}
+
+:root[data-skin="pixel"] #board,
+:root[data-skin="pixel"] #next-canvas {
+  image-rendering: pixelated;
+}
+
 /* ---- Theme switch ---- */
 .theme-toggle {
   flex-direction: row;
