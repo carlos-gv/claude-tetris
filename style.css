@@ -245,9 +245,7 @@ kbd {
   color: var(--color-accent);
 }
 
-#restart-btn,
-#resume-btn {
-  margin-top: 8px;
+.overlay-box button {
   background: var(--color-restart-bg);
   color: var(--color-restart-text);
   border: none;
@@ -260,8 +258,7 @@ kbd {
   transition: background 0.15s;
 }
 
-#restart-btn:hover,
-#resume-btn:hover {
+.overlay-box button:hover {
   background: var(--color-restart-hover);
 }
 
@@ -408,4 +405,74 @@ kbd {
 
 #save-score-btn:hover {
   background: var(--color-restart-hover);
+}
+
+#gameover-restart-btn {
+  margin-top: 8px;
+}
+
+/* ---- Menú de pausa ---- */
+.pause-menu.hidden,
+.menu-controls.hidden {
+  display: none;
+}
+
+.pause-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  width: 220px;
+  margin-top: 4px;
+}
+
+#controls-btn {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-board-border);
+}
+
+#controls-btn:hover {
+  background: var(--color-kbd-bg);
+}
+
+.menu-controls {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-board-border);
+  border-radius: 6px;
+  background: var(--color-board-bg);
+}
+
+.menu-controls li {
+  font-size: 12px;
+  color: var(--color-controls-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.menu-level {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--color-label);
+  font-weight: 600;
+}
+
+.menu-level select {
+  background: var(--color-kbd-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-kbd-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
 }

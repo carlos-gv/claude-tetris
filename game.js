@@ -47,6 +47,11 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const resumeBtn = document.getElementById('resume-btn');
+const gameoverRestartBtn = document.getElementById('gameover-restart-btn');
+const pauseMenu = document.getElementById('pause-menu');
+const controlsBtn = document.getElementById('controls-btn');
+const controlsList = document.getElementById('controls-list');
+const startLevelSelect = document.getElementById('start-level');
 const themeSwitch = document.getElementById('theme-switch');
 const startOverlay = document.getElementById('start-overlay');
 const startBtn = document.getElementById('start-btn');
@@ -56,6 +61,10 @@ const gameoverRecordsEl = document.getElementById('gameover-records');
 const nameEntry = document.getElementById('name-entry');
 const nameInput = document.getElementById('name-input');
 const saveScoreBtn = document.getElementById('save-score-btn');
+
+const START_LEVEL_KEY = 'tetris-start-level';
+const MAX_START_LEVEL = 15;
+let startLevel = 1;
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let combo, maxCombo;
@@ -114,6 +123,10 @@ function escapeHtml(s) {
 
 function refreshStartRecords() {
   renderRecords(startRecordsEl, loadRecords(), -1);
+}
+
+function dropIntervalForLevel(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
 }
 
 function createBoard() {
@@ -183,8 +196,8 @@ function clearLines() {
     combo++;
     if (combo > maxCombo) maxCombo = combo;
     if (combo > 1) score += 50 * (combo - 1) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = Math.floor(lines / 10) + startLevel;
+    dropInterval = dropIntervalForLevel(level);
     updateHUD();
   } else {
     combo = 0;
@@ -312,8 +325,8 @@ function endGame() {
   overlay.classList.add('overlay--gameover');
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}  ·  Combo máx: ${maxCombo}`;
-  resumeBtn.classList.add('hidden');
-  restartBtn.classList.remove('hidden');
+  pauseMenu.classList.add('hidden');
+  gameoverRestartBtn.classList.remove('hidden');
 
   const records = loadRecords();
   if (maxCombo > records.bestCombo) records.bestCombo = maxCombo;
@@ -359,11 +372,16 @@ function showStartScreen() {
   startOverlay.classList.remove('hidden');
 }
 
+function isMenuOpen() {
+  return paused && !gameOver;
+}
+
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
     overlay.classList.add('hidden');
+    collapseControls();
     lastTime = performance.now();
     loop(lastTime);
   } else {
@@ -372,10 +390,27 @@ function togglePause() {
     overlay.classList.add('overlay--paused');
     overlayTitle.textContent = 'PAUSA';
     overlayScore.textContent = '';
-    resumeBtn.classList.remove('hidden');
-    restartBtn.classList.remove('hidden');
+    gameoverRestartBtn.classList.add('hidden');
+    pauseMenu.classList.remove('hidden');
     overlay.classList.remove('hidden');
+    resumeBtn.focus();
   }
+}
+
+function collapseControls() {
+  controlsList.classList.add('hidden');
+  controlsBtn.setAttribute('aria-expanded', 'false');
+}
+
+function populateStartLevelSelect() {
+  startLevelSelect.innerHTML = '';
+  for (let i = 1; i <= MAX_START_LEVEL; i++) {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = String(i);
+    startLevelSelect.appendChild(opt);
+  }
+  startLevelSelect.value = String(startLevel);
 }
 
 function loop(ts) {
@@ -400,12 +435,12 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
   combo = 0;
   maxCombo = 0;
-  dropInterval = 1000;
+  dropInterval = dropIntervalForLevel(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
@@ -415,14 +450,15 @@ function init() {
   nameEntry.classList.add('hidden');
   overlay.classList.add('hidden');
   overlay.classList.remove('overlay--paused', 'overlay--gameover');
-  resumeBtn.classList.add('hidden');
-  restartBtn.classList.remove('hidden');
+  pauseMenu.classList.add('hidden');
+  gameoverRestartBtn.classList.add('hidden');
+  collapseControls();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -446,10 +482,8 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', () => {
-  if (gameOver) showStartScreen();
-  else init();
-});
+restartBtn.addEventListener('click', () => { paused = false; init(); });
+gameoverRestartBtn.addEventListener('click', showStartScreen);
 resumeBtn.addEventListener('click', togglePause);
 startBtn.addEventListener('click', init);
 saveScoreBtn.addEventListener('click', saveCurrentScore);
@@ -459,6 +493,16 @@ nameInput.addEventListener('keydown', e => {
 resetRecordsBtn.addEventListener('click', () => {
   saveRecords({ list: [], bestCombo: 0, bestLines: 0 });
   refreshStartRecords();
+});
+
+controlsBtn.addEventListener('click', () => {
+  const open = controlsList.classList.toggle('hidden');
+  controlsBtn.setAttribute('aria-expanded', String(!open));
+});
+
+startLevelSelect.addEventListener('change', () => {
+  startLevel = Math.min(MAX_START_LEVEL, Math.max(1, parseInt(startLevelSelect.value, 10) || 1));
+  localStorage.setItem(START_LEVEL_KEY, String(startLevel));
 });
 
 function applyTheme(theme) {
@@ -476,6 +520,10 @@ themeSwitch.addEventListener('change', () => {
   localStorage.setItem(THEME_KEY, theme);
   applyTheme(theme);
 });
+
+const savedStartLevel = parseInt(localStorage.getItem(START_LEVEL_KEY), 10);
+if (savedStartLevel >= 1 && savedStartLevel <= MAX_START_LEVEL) startLevel = savedStartLevel;
+populateStartLevelSelect();
 
 initTheme();
 board = createBoard();
