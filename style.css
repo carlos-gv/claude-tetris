@@ -264,3 +264,148 @@ kbd {
 #resume-btn:hover {
   background: var(--color-restart-hover);
 }
+
+#start-title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: var(--color-accent);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-controls-text);
+  border: 1px solid var(--color-board-border);
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.btn-secondary:hover {
+  color: var(--color-text);
+}
+
+/* ---- Tabla de records ---- */
+.records {
+  width: 260px;
+}
+
+.records__title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--color-label);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.records__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+}
+
+.records__table th {
+  color: var(--color-label);
+  font-weight: 600;
+  text-align: right;
+  padding: 2px 4px;
+  border-bottom: 1px solid var(--color-board-border);
+}
+
+.records__table th:nth-child(2) {
+  text-align: left;
+}
+
+.records__table td {
+  text-align: right;
+  padding: 3px 4px;
+  color: var(--color-text);
+}
+
+.records__name {
+  text-align: left !important;
+  color: var(--color-accent) !important;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records__row--hl td {
+  background: var(--color-accent);
+  color: var(--color-restart-text);
+}
+
+.records__row--hl .records__name {
+  color: var(--color-restart-text) !important;
+}
+
+.records__empty {
+  text-align: center !important;
+  color: var(--color-controls-text);
+  padding: 10px 0 !important;
+}
+
+.records__stats {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--color-controls-text);
+}
+
+.records__stats strong {
+  color: var(--color-accent);
+}
+
+/* ---- Entrada de nombre ---- */
+.name-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.name-entry.hidden {
+  display: none;
+}
+
+.name-entry__msg {
+  font-size: 12px;
+  color: var(--color-overlay-title);
+  font-weight: 600;
+}
+
+#name-input {
+  background: var(--color-board-bg);
+  border: 1px solid var(--color-board-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--color-text);
+  text-align: center;
+  font-family: inherit;
+  width: 180px;
+}
+
+#name-input:focus {
+  outline: 1px solid var(--color-accent);
+}
+
+#save-score-btn {
+  background: var(--color-restart-bg);
+  color: var(--color-restart-text);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+#save-score-btn:hover {
+  background: var(--color-restart-hover);
+}
